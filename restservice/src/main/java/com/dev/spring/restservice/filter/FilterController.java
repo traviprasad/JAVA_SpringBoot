@@ -8,5 +8,6 @@ public class FilterController {
 
     @GetMapping(path = "/filter")
     public void staticFilter(){
+
     }
 }
