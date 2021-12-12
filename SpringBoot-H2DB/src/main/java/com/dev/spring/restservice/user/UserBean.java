@@ -1,17 +1,25 @@
 package com.dev.spring.restservice.user;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Size;
 import java.util.Date;
 
+
+@Entity
 public class UserBean {
 
+    @Id
+    @GeneratedValue
     private Integer id;
 
     //@Size(min = 2,max = 25,message = "name should have min 2 and max 25 charcters")
     @NotBlank(message = "name must not be blank") @NotNull(message = "name must not be null")
+
     private String name;
 
     @Size(min = 3,max = 50,message = "Location should have min 3 and max 50 charcters")
@@ -19,6 +27,8 @@ public class UserBean {
 
     @Past
     private Date dob;
+
+    public UserBean(){}
 
     public UserBean(Integer id, String name, String location, Date dob) {
         this.id = id;

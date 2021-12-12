@@ -11,6 +11,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -18,43 +19,42 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class UserResources {
 
     @Autowired
-    private UserDaoService userDaoService;
-
+    private UserRepositroy userRepositroy;
     //List of Users
-    @GetMapping(path = "/users/all")
+    @GetMapping(path = "/jpa/users/all")
     public List<UserBean> retriveAllUsers(){
-        return userDaoService.findAllUsers();
+        return userRepositroy.findAll();
     }
 
     //retrive user details
-    @GetMapping(path = "/users/{id}",  produces = APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/jpa/users/{id}",  produces = APPLICATION_JSON_VALUE)
     public EntityModel<UserBean> retriveUserId(@PathVariable int id){
-        UserBean user = userDaoService.findUser(id);
-        if(user == null){
+        Optional<UserBean> user = userRepositroy.findById(id);
+        if(!user.isPresent()){
             throw new UsertNotFoundException("id "+id);
         }
 
-        EntityModel<UserBean> model = EntityModel.of(user);
+        EntityModel<UserBean> model = EntityModel.of(user.get());
         WebMvcLinkBuilder linkToUser = linkTo(methodOn(this.getClass()).retriveAllUsers());
         model.add(linkToUser.withRel("all-users"));
         return model;
     }
 
     //add new users
-    @PostMapping(path = "/users")
+    @PostMapping(path = "/jpa/users")
     public ResponseEntity createUser(@Valid @RequestBody UserBean userBean){
-        UserBean uBean = userDaoService.saveUser(userBean);
+        UserBean uBean = userRepositroy.save(userBean);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(uBean.getId()).toUri();
        return ResponseEntity.created(location).body(uBean);
     }
 
     //delete user details
-    @DeleteMapping(path = "/users/{id}")
+    @DeleteMapping(path = "/jpa/users/{id}")
     public void deleteUserId(@PathVariable int id){
-        UserBean user = userDaoService.deleteUser(id);
-        if(user == null){
+       userRepositroy.deleteById(id);
+        /*if(user == null){
             throw new UsertNotFoundException("id "+id);
-        }
+        }*/
 
         //return user;
     }
