@@ -20,6 +20,9 @@ public class UserResources {
 
     @Autowired
     private UserRepositroy userRepositroy;
+
+    @Autowired
+    private PostRepositroy postRepositroy;
     //List of Users
     @GetMapping(path = "/jpa/users/all")
     public List<UserBean> retriveAllUsers(){
@@ -57,5 +60,32 @@ public class UserResources {
         }*/
 
         //return user;
+    }
+
+    //retrive user post details
+    @GetMapping(path = "/jpa/users/{id}/posts",  produces = APPLICATION_JSON_VALUE)
+    public List<Post> retriveUserPosts(@PathVariable int id){
+        Optional<UserBean> user = userRepositroy.findById(id);
+        if(!user.isPresent()){
+            throw new UsertNotFoundException("id "+id);
+        }
+
+        return user.get().getPosts();
+    }
+
+    @PostMapping(path = "/jpa/users/{id}/posts",  produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> postUserPosts(@PathVariable int id, @Valid @RequestBody Post post){
+        Optional<UserBean> userOptional = userRepositroy.findById(id);
+        if(!userOptional.isPresent()){
+            throw new UsertNotFoundException("id "+id);
+        }
+        UserBean userBean = userOptional.get();
+
+        post.setUserBean(userBean);
+        postRepositroy.save(post);
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(post.getId()).toUri();
+        return ResponseEntity.created(location).body(post);
+
     }
 }
